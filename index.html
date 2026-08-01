@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where's everyone going? — Siena</title>
+<script>
+  try { const t = localStorage.getItem('siena:theme');
+        if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#F2EEE4; --leaf:#FBF9F4; --ink:#221F1A; --muted:#6E675C;
+    --faint:#9A9184; --rule:#DCD4C5;
+    --green:#1F5F4B; --green-soft:#E4EDE7;
+    --ochre:#8A6A15; --ochre-soft:#F2EBD9;
+    --alarm:#8A2A1E; --alarm-soft:#F5E3DF;
+    --veil:rgba(34,31,26,.4);
+    --display:"EB Garamond",Georgia,"Times New Roman",serif;
+    --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    --data:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#191713; --leaf:#221F19; --ink:#EDE7DA; --muted:#9C9384;
+      --faint:#6B6355; --rule:#372F26;
+      --green:#4FA383; --green-soft:#1B3128;
+      --ochre:#C9A24A; --ochre-soft:#332A16;
+      --alarm:#D9806E; --alarm-soft:#3B211C;
+      --veil:rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#191713; --leaf:#221F19; --ink:#EDE7DA; --muted:#9C9384;
+    --faint:#6B6355; --rule:#372F26;
+    --green:#4FA383; --green-soft:#1B3128;
+    --ochre:#C9A24A; --ochre-soft:#332A16;
+    --alarm:#D9806E; --alarm-soft:#3B211C;
+    --veil:rgba(0,0,0,.6);
+  }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--body);
+         font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:540px; margin:0 auto; padding:24px 20px 72px; }
+  .masthead { border-bottom:1.5px solid var(--ink); padding-bottom:14px; margin-bottom:4px; }
+  .masthead h1 { font-family:var(--display); font-size:34px; font-weight:500;
+                 line-height:1.05; margin:0 0 6px; letter-spacing:-0.01em; }
+  .masthead .sub { font-family:var(--data); font-size:11px; letter-spacing:.09em;
+                   text-transform:uppercase; color:var(--muted); }
+  .whoami { display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+            font-family:var(--data); font-size:11px; letter-spacing:.05em;
+            color:var(--muted); padding:10px 0 18px; flex-wrap:wrap; }
+  .whoami .right { display:flex; gap:13px; flex:0 0 auto; }
+  .linkbtn { background:none; border:0; padding:0; cursor:pointer; font:inherit;
+             color:var(--muted); text-decoration:underline; text-underline-offset:3px;
+             min-height:0; border-radius:0; }
+  .linkbtn:hover { color:var(--ink); border-color:transparent; }
+
+  .dossier { border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+             padding:13px 0; margin-bottom:6px; font-family:var(--data); font-size:12px;
+             line-height:1.75; letter-spacing:.01em; color:var(--muted); }
+  .dossier .cap { font-size:10px; letter-spacing:.11em; text-transform:uppercase;
+                  color:var(--faint); display:block; margin-bottom:4px; }
+  .dossier b { color:var(--ink); font-weight:500; }
+  .dossier .warn { color:var(--alarm); }
+
+  .attention { background:var(--ochre-soft); border-radius:2px; padding:12px 14px;
+               margin:14px 0 8px; font-family:var(--data); font-size:11.5px;
+               line-height:1.7; color:var(--ink); }
+  .attention .cap { font-size:10px; letter-spacing:.11em; text-transform:uppercase;
+                    color:var(--ochre); display:block; margin-bottom:5px; }
+  .attention ul { list-style:none; margin:0; padding:0; }
+  .attention li { padding-left:13px; text-indent:-13px; }
+  .attention li::before { content:"· "; color:var(--ochre); }
+
+  .stale { font-family:var(--data); font-size:10.5px; letter-spacing:.05em;
+           color:var(--ochre); background:var(--ochre-soft); padding:7px 11px;
+           border-radius:2px; margin-bottom:16px; }
+
+  .entry { border-top:1px solid var(--rule); padding:22px 0 20px; }
+  .entry-head { display:flex; gap:14px; align-items:flex-start; }
+  .datemark { font-family:var(--data); font-size:11px; line-height:1.35; color:var(--muted);
+              text-align:right; flex:0 0 46px; padding-top:5px; letter-spacing:.02em; }
+  .datemark b { display:block; font-weight:500; font-size:15px; color:var(--ink); }
+  .dest { font-family:var(--display); font-size:25px; font-weight:500; line-height:1.15; margin:0; }
+  .dest .nights { font-family:var(--data); font-size:10px; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--ochre); vertical-align:5px; margin-left:7px; }
+  .meta { font-family:var(--data); font-size:11.5px; color:var(--muted); margin-top:5px; }
+  .meta span + span::before { content:" · "; color:var(--faint); }
+  .notes { font-size:14px; color:var(--muted); margin:9px 0 0; }
+
+  .banner { display:flex; gap:2px; height:22px; margin:15px 0 9px; }
+  .banner i { flex:1 1 auto; min-width:4px; max-width:15px; border-radius:1px; }
+  .banner i.in { background:var(--green); }
+  .banner i.mb { background:var(--ochre); }
+  .banner.empty { border-bottom:1px dashed var(--rule); height:0; margin:18px 0 11px; }
+
+  .roll { font-size:13.5px; line-height:1.5; }
+  .roll b { font-weight:500; }
+  .roll .maybe { color:var(--muted); }
+  .roll .nobody { color:var(--faint); font-style:italic; }
+  .tag { font-family:var(--data); font-size:11px; letter-spacing:.03em; margin-top:7px;
+         display:block; width:fit-content; padding:3px 9px; border-radius:2px; }
+  .tag.short { background:var(--ochre-soft); color:var(--ochre); }
+  .tag.met   { background:var(--green-soft); color:var(--green); }
+  .tag.clash { background:var(--alarm-soft); color:var(--alarm); }
+  .tag.edit  { background:var(--ochre-soft); color:var(--ochre); max-width:100%;
+               white-space:normal; line-height:1.5; }
+  .clashnote { font-family:var(--data); font-size:11.5px; line-height:1.6;
+               background:var(--alarm-soft); color:var(--alarm); border-radius:2px;
+               padding:9px 11px; margin:10px 0 0; }
+  .clashnote.soft { background:var(--ochre-soft); color:var(--ochre); }
+
+  .actions { display:flex; gap:8px; margin-top:15px; }
+  button { font-family:var(--body); font-size:14px; cursor:pointer; border:1px solid var(--rule);
+           background:var(--leaf); color:var(--ink); border-radius:3px; padding:11px 12px;
+           min-height:44px; transition:border-color .12s, background .12s; }
+  button:hover { border-color:var(--muted); }
+  button:active { transform:translateY(1px); }
+  button:focus-visible { outline:2px solid var(--green); outline-offset:2px; }
+  button[disabled] { opacity:.55; cursor:default; }
+  .actions button { flex:1; }
+  .actions button.on { background:var(--green); border-color:var(--green); color:var(--paper); }
+  .actions button.on.maybe { background:var(--ochre); border-color:var(--ochre); color:var(--paper); }
+  .actions .ghost { flex:0 0 auto; padding:11px 12px; color:var(--muted); }
+
+  .newbtn { width:100%; margin-top:30px; padding:15px; font-family:var(--display);
+            font-size:18px; background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .newbtn:hover { background:var(--ink); border-color:var(--ink); opacity:.88; }
+  .altbtn { width:100%; margin-top:10px; padding:13px; font-family:var(--display);
+            font-size:16px; background:transparent; color:var(--ink); border-color:var(--ink); }
+  .quietbtn { width:100%; margin-top:8px; padding:11px; font-family:var(--data);
+              font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+              background:transparent; color:var(--muted); border-color:var(--rule); }
+
+  .sheet { position:fixed; inset:0; background:var(--veil); display:flex;
+           align-items:flex-end; justify-content:center; z-index:20; }
+  .sheet-inner { background:var(--paper); width:100%; max-width:540px; border-radius:6px 6px 0 0;
+                 padding:22px 20px 26px; max-height:92vh; overflow-y:auto; }
+  .sheet h2 { font-family:var(--display); font-size:25px; font-weight:500; margin:0 0 4px; }
+  .sheet .lede { font-size:13.5px; color:var(--muted); margin:0 0 16px; }
+
+  label { display:block; font-family:var(--data); font-size:10.5px; letter-spacing:.09em;
+          text-transform:uppercase; color:var(--muted); margin:15px 0 5px; }
+  input, select, textarea { width:100%; font-family:var(--body); font-size:16px; color:var(--ink);
+    background:var(--leaf); border:1px solid var(--rule); border-radius:3px;
+    padding:11px 12px; min-height:44px; }
+  input:focus, select:focus, textarea:focus { outline:2px solid var(--green);
+    outline-offset:-1px; border-color:var(--green); }
+  textarea { min-height:66px; resize:vertical; line-height:1.5; }
+  .row { display:flex; gap:10px; }
+  .row > div { flex:1; }
+  .hint { font-size:12.5px; color:var(--muted); margin:6px 0 0; }
+  .gate p { color:var(--muted); font-size:14px; margin:0 0 20px; }
+
+  .modes { display:flex; gap:6px; margin:4px 0 10px; }
+  .modes button { flex:1; font-size:13px; padding:10px 6px; }
+  .modes button.on { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+  .verdict { border-top:1px solid var(--ink); border-bottom:1px solid var(--ink);
+             padding:22px 0; margin:18px 0 4px; text-align:center; }
+  .verdict .q { font-family:var(--data); font-size:10.5px; letter-spacing:.1em;
+                text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8px; }
+  .verdict .r { font-family:var(--display); font-size:32px; line-height:1.15;
+                font-weight:500; display:block; }
+  .verdict .said { font-size:13px; color:var(--muted); margin-top:9px; display:block;
+                   font-style:italic; }
+
+  .ledger { margin-top:22px; border-top:1px solid var(--rule); padding-top:14px; }
+  .ledger .cap { font-family:var(--data); font-size:10px; letter-spacing:.11em;
+                 text-transform:uppercase; color:var(--faint); display:block; margin-bottom:9px; }
+  .ledger ol { list-style:none; margin:0; padding:0; }
+  .ledger li { font-family:var(--data); font-size:11.5px; line-height:1.6; color:var(--muted);
+               padding:6px 0; border-top:1px solid var(--rule); }
+  .ledger li:first-child { border-top:0; }
+  .ledger b { color:var(--ink); font-weight:500; }
+  .ledger .again { color:var(--alarm); }
+  .ledger .none { color:var(--faint); font-style:italic; font-family:var(--body); font-size:13px; }
+
+  .preview { font-family:var(--data); font-size:11.5px; line-height:1.65; white-space:pre-wrap;
+             background:var(--leaf); border:1px solid var(--rule); border-radius:3px;
+             padding:13px; margin:14px 0 0; color:var(--ink); max-height:44vh; overflow-y:auto; }
+
+  .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:var(--paper); padding:11px 18px; border-radius:3px;
+    font-size:13.5px; z-index:40; font-family:var(--data); letter-spacing:.02em;
+    max-width:90%; text-align:center; }
+  .state { padding:40px 0; color:var(--muted); font-size:14px; }
+  .state.err { color:var(--alarm); }
+  .state code { font-family:var(--data); font-size:12.5px; background:var(--leaf);
+                padding:2px 5px; border-radius:2px; }
+  .empty-note { border-top:1px solid var(--rule); padding-top:24px;
+                font-family:var(--display); font-size:19px; color:var(--muted); }
+  .past-toggle { margin-top:34px; text-align:center; }
+
+  /* --- tabs --- */
+  .tabs { display:flex; border-bottom:1px solid var(--rule); margin:2px 0 16px; }
+  .tabs button { flex:1; background:none; border:0; border-bottom:2px solid transparent;
+                 border-radius:0; min-height:0; padding:10px 4px; font-family:var(--data);
+                 font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+                 color:var(--muted); cursor:pointer; }
+  .tabs button.on { color:var(--ink); border-bottom-color:var(--ink); }
+  .tabs button:hover { color:var(--ink); border-color:transparent; border-bottom-color:var(--rule); }
+  .tabs button.on:hover { border-bottom-color:var(--ink); }
+
+  /* --- reference sections --- */
+  .doc h2 { font-family:var(--display); font-size:23px; font-weight:500; line-height:1.2;
+            margin:30px 0 5px; }
+  .doc h2:first-child { margin-top:0; }
+  .doc h3 { font-family:var(--data); font-size:10px; letter-spacing:.11em; font-weight:500;
+            text-transform:uppercase; color:var(--green); margin:20px 0 7px; }
+  .doc p { font-size:14px; color:var(--muted); margin:0 0 11px; }
+  .doc b { color:var(--ink); font-weight:500; }
+  .doc ul { margin:0 0 11px; padding-left:17px; font-size:14px; color:var(--muted); }
+  .doc li { margin-bottom:6px; }
+  .doc .lede { background:var(--green-soft); border-left:2px solid var(--green);
+               padding:12px 14px; border-radius:2px; color:var(--ink); font-size:13.5px; }
+  .doc .warnbox { background:var(--alarm-soft); border-left:2px solid var(--alarm);
+                  padding:12px 14px; border-radius:2px; color:var(--ink); font-size:13.5px; }
+  .doc .softbox { background:var(--ochre-soft); border-left:2px solid var(--ochre);
+                  padding:12px 14px; border-radius:2px; color:var(--ink); font-size:13.5px; }
+  .doc .src { font-family:var(--data); font-size:10.5px; line-height:1.7; color:var(--faint);
+              border-top:1px solid var(--rule); padding-top:12px; margin-top:26px; }
+
+  .num { display:flex; gap:12px; align-items:baseline; padding:10px 0;
+         border-top:1px solid var(--rule); }
+  .num .n { font-family:var(--data); font-size:14px; color:var(--ink); flex:0 0 92px; }
+  .num .n.urgent { font-size:17px; font-weight:500; color:var(--alarm); }
+  .num .d { font-size:13px; color:var(--muted); flex:1; }
+  .num .d b { display:block; color:var(--ink); font-weight:500; font-size:13.5px; }
+  .num a { color:var(--green); text-decoration:none;
+           border-bottom:1px solid var(--rule); padding-bottom:1px; }
+
+  .cal { display:flex; gap:11px; padding:7px 0; border-top:1px solid var(--rule);
+         font-size:13px; color:var(--muted); }
+  .cal .when { font-family:var(--data); font-size:11.5px; color:var(--ink);
+               flex:0 0 84px; padding-top:1px; }
+  .cal .who { font-family:var(--data); font-size:10px; letter-spacing:.06em;
+              text-transform:uppercase; color:var(--faint); }
+  .cal.all .what { color:var(--ink); }
+
+  /* --- collapsible topics --- */
+  details.topic { border-top:1px solid var(--rule); }
+  details.topic > summary { list-style:none; cursor:pointer; padding:14px 0;
+    font-family:var(--display); font-size:19px; color:var(--ink);
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  details.topic > summary::-webkit-details-marker { display:none; }
+  details.topic > summary::after { content:"+"; font-family:var(--data); font-size:16px;
+    color:var(--faint); flex:0 0 auto; }
+  details.topic[open] > summary::after { content:"\2013"; }
+  details.topic > summary:hover { color:var(--green); }
+  details.topic > summary:focus-visible { outline:2px solid var(--green); outline-offset:2px; }
+  .topicnote { font-size:13px; color:var(--muted); margin:0 0 6px; padding-bottom:6px; }
+  .ph { padding:9px 0 10px; border-top:1px solid var(--rule); }
+  .ph .en { font-size:12.5px; color:var(--muted); }
+  .ph .it { font-family:var(--display); font-size:17px; line-height:1.25;
+            color:var(--ink); margin-top:1px; }
+  .ph .say { font-family:var(--data); font-size:11px; color:var(--faint); margin-top:3px; }
+  .rulelist { font-size:13.5px; color:var(--muted); }
+  .rulelist div { padding:7px 0; border-top:1px solid var(--rule); }
+  .rulelist b { font-family:var(--data); font-size:12.5px; color:var(--ink); }
+
+  @media print {
+    .tabs, .whoami, .actions, .newbtn, .altbtn, .quietbtn, .past-toggle { display:none !important; }
+    body { background:#fff; }
+    details.topic > summary::after { content:""; }
+    .doc h2 { page-break-after:avoid; }
+    .ph, .num, .cal { page-break-inside:avoid; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    * { transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="masthead">
+    <h1>Where's everyone going?</h1>
+    <div class="sub">Siena &middot; summer trips</div>
+  </div>
+  <div id="app"><div class="state">Opening the ledger…</div></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://zmlstgxvujxrwctqwjlw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_i9xakqu9DvL5XMxJfiRExA_jayrBZWE';
+
+/* Your published address, e.g. 'https://yourname.github.io/siena'.
+   Used only in the weekly digest. Leave blank and the link line is omitted. */
+const SITE_URL = 'https://jakelau1.github.io/siena-coordination-webapp';
+
+const CACHE = 'siena:board';
+
+/* ---- the fixed program calendar ----------------------------------------
+   Source: the official "2026 Italy Summer Abroad Calendar, 1–29 August".
+   Where the preliminary Creative Writing syllabus disagrees with it, the
+   calendar wins — it is program-wide, more recent, and required reading.
+
+   blocks:true  the day is spoken for. Excluded from the free-day scan and
+                warned about on a new proposal.
+   blocks:false a notice. Shows on the board and raises a softer warning,
+                but does not stop the day counting as free.
+   tbc:true     the program has not confirmed this. Rendered as provisional.
+
+   Edit this list when the program announces a change. Nothing else needs
+   touching — every scan below is derived from it. */
+
+const COURSES = { all:'Everyone', ENG:'Creative Writing',
+                  CRI:'Criminology', FAH:'Art History' };
+
+const PROGRAM_START = '2026-08-01', PROGRAM_END = '2026-08-29';
+
+const PROGRAM = [
+  { start:'2026-08-01', course:'all', blocks:true,  title:'Arrival — Rome to Siena',
+    detail:'Lands Rome 10:20, coach 12:30, residence check-in 17:30 (tentative)' },
+  { start:'2026-08-02', course:'all', blocks:true,  title:'Orientation and contrada dinner',
+    detail:'Walking tours, welcome lunch 12:30, dinner 19:30' },
+  { start:'2026-08-03', course:'all', blocks:true,  title:'University welcome — first class',
+    detail:'08:15 in the residence lobby. Class runs 10:15–13:30' },
+  { start:'2026-08-04', course:'FAH', blocks:true,  title:'Pistoia', tbc:true },
+  { start:'2026-08-05', end:'2026-08-06', course:'ENG', blocks:true, title:'Rome' },
+  { start:'2026-08-05', course:'CRI', blocks:true,  title:'Gaiole' },
+  { start:'2026-08-06', course:'CRI', blocks:true,  title:'Volterra', tbc:true },
+  { start:'2026-08-10', course:'ENG', blocks:true,  title:'Florence' },
+  { start:'2026-08-10', end:'2026-08-12', course:'CRI', blocks:true, title:'Rome' },
+  { start:'2026-08-12', course:'ENG', blocks:true,  title:'Assisi and Perugia' },
+  { start:'2026-08-12', end:'2026-08-13', course:'FAH', blocks:true, title:'Venice' },
+  { start:'2026-08-15', course:'all', blocks:false, title:'Ferragosto',
+    detail:'National holiday. Much of Italy shuts or leaves town' },
+  { start:'2026-08-16', course:'all', blocks:true,  title:'Palio di Siena — mandatory',
+    detail:'Piazza del Campo. You need to be in position hours early' },
+  { start:'2026-08-17', end:'2026-08-19', course:'CRI', blocks:true, title:'Florence' },
+  { start:'2026-08-17', course:'all', blocks:false, title:'Last day to drop without penalty' },
+  { start:'2026-08-18', course:'FAH', blocks:true,
+    title:'Colle Val d\u2019Elsa, Poggibonsi and San Gimignano' },
+  { start:'2026-08-19', end:'2026-08-20', course:'ENG', blocks:true, title:'Venice' },
+  { start:'2026-08-25', course:'ENG', blocks:true,  title:'Volterra' },
+  { start:'2026-08-25', end:'2026-08-27', course:'FAH', blocks:true, title:'Rome' },
+  { start:'2026-08-25', end:'2026-08-26', course:'CRI', blocks:true, title:'Siena Police',
+    tbc:true, detail:'One of these two days, not both' },
+  { start:'2026-08-27', course:'all', blocks:false, title:'Last day of classes' },
+  { start:'2026-08-29', course:'all', blocks:true,  title:'Program ends — buses to Rome airport',
+    detail:'04:00 or 05:00, still to be confirmed. Recommended flight 14:20' }
+];
+
+let people = [], trips = [], rsvps = [], draws = [], meId = null;
+let showPast = false, lastSync = null, offline = false;
+let tab = 'board';   /* 'board' | 'siena' | 'italian' */
+
+/* ---- network ---- */
+
+async function api(path, options = {}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+  if (!res.ok) throw new Error(res.status + ' ' + (await res.text()).slice(0, 200));
+  return res.status === 204 ? null : res.json();
+}
+
+const shapeTrip = t => ({
+  id: t.id, destination: t.destination, start: t.start_date, end: t.end_date,
+  meetPoint: t.meet_point, meetTime: t.meet_time, cost: t.cost,
+  minPeople: t.min_people, notes: t.notes, proposedBy: t.proposed_by,
+  lastChange: t.last_change, updatedAt: t.updated_at
+});
+
+async function load() {
+  const [pp, tt, rr, dd] = await Promise.all([
+    api('people?select=*'), api('trips?select=*'), api('rsvps?select=*'),
+    api('draws?select=*&order=created_at.desc&limit=40')
+  ]);
+  people = pp;
+  trips  = tt.map(shapeTrip);
+  rsvps  = rr.map(r => ({ tripId: r.trip_id, personId: r.person_id, status: r.status }));
+  draws  = dd;
+  lastSync = Date.now(); offline = false; stash();
+}
+
+const insert = (table, row) =>
+  api(table, { method:'POST', headers:{ Prefer:'return=representation' }, body: JSON.stringify(row) });
+const patch = (table, filter, row) =>
+  api(`${table}?${filter}`, { method:'PATCH', headers:{ Prefer:'return=representation' },
+                              body: JSON.stringify(row) });
+const upsertRsvp = row =>
+  api('rsvps', { method:'POST',
+    headers:{ Prefer:'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify(row) });
+const removeRsvp = (tripId, personId) =>
+  api(`rsvps?trip_id=eq.${tripId}&person_id=eq.${personId}`, { method:'DELETE' });
+
+/* ---- cache ---- */
+
+function stash() {
+  try { localStorage.setItem(CACHE,
+    JSON.stringify({ people, trips, rsvps, draws, at: lastSync })); } catch (e) {}
+}
+function unstash() {
+  try {
+    const raw = localStorage.getItem(CACHE);
+    if (!raw) return false;
+    const c = JSON.parse(raw);
+    people = c.people || []; trips = c.trips || [];
+    rsvps = c.rsvps || []; draws = c.draws || [];
+    lastSync = c.at || null;
+    return true;
+  } catch (e) { return false; }
+}
+
+let queue = Promise.resolve();
+function enqueue(fn) {
+  queue = queue.then(fn).catch(async () => {
+    toast('Not saved — reloading');
+    try { await load(); } catch (e) { offline = true; }
+    render();
+  });
+}
+
+/* ---- helpers ---- */
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const nameOf = id => (people.find(p => p.id === id) || {}).name || 'Someone';
+const today = () => new Date().toISOString().slice(0, 10);
+const endOf = t => t.end || t.start;
+
+function addDays(iso, n) {
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function isDark() {
+  const t = document.documentElement.getAttribute('data-theme');
+  if (t) return t === 'dark';
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function toggleTheme() {
+  const next = isDark() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('siena:theme', next); } catch (e) {}
+  render();
+}
+function fmt(iso) {
+  if (!iso) return '';
+  return new Date(iso + 'T12:00:00')
+    .toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+}
+function dateMark(iso) {
+  const d = new Date(iso + 'T12:00:00');
+  return `<span class="datemark">${d.toLocaleDateString('en-GB',{weekday:'short'})}<b>${d.getDate()}</b>${d.toLocaleDateString('en-GB',{month:'short'})}</span>`;
+}
+function nightsLabel(t) {
+  if (!t.end || t.end <= t.start) return '';
+  const n = Math.round((new Date(t.end) - new Date(t.start)) / 86400000);
+  return `<span class="nights">${n} night${n > 1 ? 's' : ''}</span>`;
+}
+function daysAway(iso) {
+  const n = Math.round((new Date(iso + 'T12:00:00') - new Date(today() + 'T12:00:00')) / 86400000);
+  if (n <= 0) return 'today';
+  if (n === 1) return 'tomorrow';
+  return `in ${n} days`;
+}
+function ago(ts) {
+  if (!ts) return 'never';
+  const m = Math.round((Date.now() - (typeof ts === 'number' ? ts : Date.parse(ts))) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} hr ago`;
+  return `${Math.round(h / 24)} d ago`;
+}
+function roll(list, verb) {
+  const names = list.map(r => nameOf(r.personId));
+  if (names.length === 1) return `<b>${esc(names[0])}</b> is ${verb}`;
+  if (names.length === 2) return `<b>${esc(names[0])}</b> and <b>${esc(names[1])}</b> are ${verb}`;
+  return `<b>${esc(names[0])}</b> and ${names.length - 1} others are ${verb}`;
+}
+
+const overlap = (a, b) => a.start <= endOf(b) && b.start <= endOf(a);
+const countIn    = id => rsvps.filter(r => r.tripId === id && r.status === 'in').length;
+const countMaybe = id => rsvps.filter(r => r.tripId === id && r.status === 'maybe').length;
+function myTrips() {
+  const ids = rsvps.filter(r => r.personId === meId && r.status === 'in').map(r => r.tripId);
+  return trips.filter(t => ids.includes(t.id));
+}
+const clashesFor = trip => myTrips().filter(o => o.id !== trip.id && overlap(trip, o));
+const upcoming = () => trips.filter(t => endOf(t) >= today())
+                            .sort((a, b) => a.start.localeCompare(b.start));
+
+function pick(items) {
+  const n = items.length, buf = new Uint32Array(1);
+  const limit = Math.floor(4294967296 / n) * n;
+  let v;
+  do { crypto.getRandomValues(buf); v = buf[0]; } while (v >= limit);
+  return items[v % n];
+}
+
+/* ---- reading the program calendar ---- */
+
+const lastDay = e => e.end || e.start;
+const covers  = (e, day) => day >= e.start && day <= lastDay(e);
+const isBlocked = day => PROGRAM.some(e => e.blocks && covers(e, day));
+const programOn = day => PROGRAM.filter(e => covers(e, day));
+
+function daysBetween(start, end) {
+  const out = [];
+  if (!start) return out;
+  const stop = end && end > start ? end : start;
+  for (let d = start, guard = 0; d <= stop && guard < 60; d = addDays(d, 1), guard++)
+    out.push(d);
+  return out;
+}
+
+/* Everything a proposal spanning these dates runs into. */
+function programClashes(start, end) {
+  const days = daysBetween(start, end);
+  return PROGRAM.filter(e => days.some(d => covers(e, d)));
+}
+
+/* A day is travel-capable if it is a Friday, Saturday or Sunday — there are no
+   Friday classes — and the program has not already claimed it. Weekday
+   afternoons are free from noon but are not whole days, so they are not
+   counted here. */
+function freeWindows(fromIso, span) {
+  const out = [];
+  let run = null;
+  for (let i = 0; i <= span; i++) {
+    const day = addDays(fromIso, i);
+    if (day > PROGRAM_END) break;
+    if (day < PROGRAM_START) continue;
+    const dow = new Date(day + 'T12:00:00').getDay();
+    const open = (dow === 5 || dow === 6 || dow === 0)
+                 && !isBlocked(day)
+                 && !trips.some(t => t.start <= day && endOf(t) >= day);
+    if (!open) { run = null; continue; }
+    if (run && addDays(run.end, 1) === day) run.end = day;
+    else { run = { start: day, end: day }; out.push(run); }
+  }
+  return out;
+}
+
+function windowLabel(w) {
+  return w.end > w.start ? `${fmt(w.start)} – ${fmt(w.end)}` : fmt(w.start);
+}
+
+/* Reasons a free window might still be a bad idea. */
+function windowCaution(w) {
+  const bits = [];
+  for (const d of daysBetween(w.start, w.end))
+    for (const e of programOn(d))
+      if (!e.blocks && !bits.includes(e.title)) bits.push(e.title);
+  const after = addDays(w.end, 1);
+  const next = PROGRAM.find(e => e.blocks && e.course === 'all' && covers(e, after));
+  if (next) bits.push(next.title.split('—')[0].trim() + ' the next morning');
+  return bits.length ? ` (${bits.join(', ')})` : '';
+}
+
+/* ---- what needs attention ---- */
+
+function attentionItems() {
+  const out = [], t0 = today(), soon = addDays(t0, 7);
+
+  for (const t of upcoming()) {
+    if (!t.minPeople || t.start > soon) continue;
+    const short = t.minPeople - countIn(t.id);
+    if (short > 0)
+      out.push(`${t.destination} needs ${short} more by ${fmt(t.start)}`);
+  }
+
+  for (const t of upcoming()) {
+    if (t.start > addDays(t0, 3)) continue;
+    const m = countMaybe(t.id);
+    if (m > 0)
+      out.push(`${m} still undecided on ${t.destination} — ${daysAway(t.start)}`);
+  }
+
+  for (const w of freeWindows(addDays(t0, 1), 21).slice(0, 2))
+    out.push(`Nothing proposed for ${windowLabel(w)}${windowCaution(w)}`);
+
+  return out.slice(0, 5);
+}
+
+/* ---- the weekly digest ---- */
+
+function weekDigest() {
+  const t0 = today(), horizon = addDays(t0, 7);
+  const up = upcoming();
+  const thisWeek = up.filter(t => t.start <= horizon);
+  const later    = up.filter(t => t.start > horizon);
+
+  const lines = ["Where's everyone going — next 7 days", ''];
+
+  if (!thisWeek.length) {
+    lines.push('Nothing on the board yet. Somebody propose something.');
+    lines.push('');
+  } else {
+    for (const t of thisWeek) {
+      const when = t.end && t.end > t.start
+        ? `${fmt(t.start)} – ${fmt(t.end)}` : fmt(t.start);
+      lines.push(`${when} · ${t.destination}`);
+
+      const bits = [];
+      if (t.meetPoint || t.meetTime)
+        bits.push(`meet ${[t.meetPoint, t.meetTime].filter(Boolean).join(' ')}`);
+      if (t.cost) bits.push(`~€${Math.round(t.cost)}`);
+      const g = countIn(t.id), m = countMaybe(t.id);
+      bits.push(`${g} in${m ? `, ${m} maybe` : ''}`);
+      if (t.minPeople && g < t.minPeople) bits.push(`${t.minPeople - g} more needed to book`);
+      lines.push('  ' + bits.join(' — '));
+      lines.push('');
+    }
+  }
+
+  if (later.length) {
+    lines.push('Further out: ' + later.slice(0, 4)
+      .map(t => `${t.destination} (${fmt(t.start)})`).join(', '));
+    lines.push('');
+  }
+
+  const fixed = PROGRAM
+    .filter(e => e.blocks && lastDay(e) >= t0 && e.start <= horizon)
+    .sort((a, b) => a.start.localeCompare(b.start));
+  if (fixed.length) {
+    lines.push('Fixed by the program:');
+    for (const e of fixed) {
+      const when = e.end && e.end > e.start
+        ? `${fmt(e.start)} – ${fmt(e.end)}` : fmt(e.start);
+      lines.push(`  ${when} · ${e.title}` +
+        (e.course === 'all' ? '' : ` (${COURSES[e.course]})`) +
+        (e.tbc ? ' — not yet confirmed' : ''));
+    }
+    lines.push('');
+  }
+
+  const gaps = freeWindows(addDays(t0, 1), 14).slice(0, 2);
+  if (gaps.length) {
+    lines.push('Free and unclaimed: ' +
+      gaps.map(w => windowLabel(w) + windowCaution(w)).join('; '));
+    lines.push('');
+  }
+
+  if (SITE_URL) lines.push(SITE_URL);
+
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function openDigest() {
+  const text = weekDigest();
+  const el = document.createElement('div');
+  el.className = 'sheet';
+  el.onclick = e => { if (e.target === el) el.remove(); };
+  el.innerHTML = `<div class="sheet-inner">
+    <h2>This week</h2>
+    <p class="lede">Post it in the chat on Sunday night. Doing it every week is the whole trick.</p>
+    <div class="preview">${esc(text)}</div>
+    <button class="newbtn" onclick="copyText(${JSON.stringify(text).replace(/"/g,'&quot;')}, this)">Copy</button>
+  </div>`;
+  document.body.appendChild(el);
+}
+
+/* ---- rendering ---- */
+
+function dossier() {
+  const t0 = today();
+  const mine = myTrips().filter(t => endOf(t) >= t0)
+                        .sort((a, b) => a.start.localeCompare(b.start));
+  if (!mine.length) return '';
+  const spend = mine.reduce((s, t) => s + (Number(t.cost) || 0), 0);
+  const next = mine[0];
+  const clashing = mine.filter(t => clashesFor(t).length).length;
+
+  let l = `<span class="cap">Your ledger</span>In for <b>${mine.length}</b> trip${mine.length > 1 ? 's' : ''}`;
+  if (spend > 0) l += ` &middot; <b>&euro;${Math.round(spend)}</b> committed`;
+  l += `<br>Next: <b>${esc(next.destination)}</b>, ${fmt(next.start)} — ${daysAway(next.start)}`;
+  if (clashing) l += `<br><span class="warn">${clashing === 2
+    ? 'Two of your trips overlap' : `${clashing} of your trips overlap`}</span>`;
+  return `<div class="dossier">${l}</div>`;
+}
+
+function attentionBlock() {
+  const items = attentionItems();
+  if (!items.length) return '';
+  return `<div class="attention"><span class="cap">Needs a nudge</span>
+    <ul>${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></div>`;
+}
+
+function boardHtml() {
+  const t0 = today();
+  const list = trips.filter(t => showPast ? endOf(t) < t0 : endOf(t) >= t0)
+    .sort((a, b) => showPast ? String(b.start).localeCompare(a.start)
+                             : String(a.start).localeCompare(b.start));
+
+  let html = `<div class="whoami">
+      <span>You are ${esc(nameOf(meId))}</span>
+      <span class="right">
+        <button class="linkbtn" onclick="toggleTheme()">${isDark() ? 'light' : 'dark'}</button>
+        <button class="linkbtn" onclick="refresh(this)">refresh</button>
+        <button class="linkbtn" onclick="forget()">not you?</button>
+      </span>
+    </div>`;
+
+  if (offline) html += `<div class="stale">No signal — showing the board as of ${ago(lastSync)}.</div>`;
+  if (!showPast) { html += dossier(); html += attentionBlock(); }
+
+  if (!list.length) {
+    html += showPast
+      ? `<div class="empty-note">Nothing behind you yet.</div>`
+      : `<div class="empty-note">No trips proposed yet. Somebody has to go first — it may as well be you.</div>`;
+  }
+
+  for (const t of list) {
+    const mine  = rsvps.filter(r => r.tripId === t.id);
+    const going = mine.filter(r => r.status === 'in');
+    const maybe = mine.filter(r => r.status === 'maybe');
+    const my    = mine.find(r => r.personId === meId);
+
+    const meta = [];
+    if (t.meetPoint || t.meetTime)
+      meta.push(`<span>${esc([t.meetPoint, t.meetTime].filter(Boolean).join(', '))}</span>`);
+    if (t.cost) meta.push(`<span>~&euro;${Math.round(t.cost)}</span>`);
+    meta.push(`<span>by ${esc(nameOf(t.proposedBy))}</span>`);
+
+    let tags = '';
+    if (t.minPeople) {
+      tags += going.length >= t.minPeople
+        ? `<span class="tag met">${t.minPeople} needed — confirmed</span>`
+        : `<span class="tag short">${t.minPeople - going.length} more needed to book</span>`;
+    }
+    if (t.lastChange && endOf(t) >= t0)
+      tags += `<span class="tag edit">Changed ${ago(t.updatedAt)}: ${esc(t.lastChange)}</span>`;
+    if (my && my.status === 'in') {
+      const clash = clashesFor(t);
+      if (clash.length) tags += `<span class="tag clash">Overlaps ${
+        clash.map(c => esc(c.destination)).join(' and ')}</span>`;
+    }
+
+    const blocks = [
+      ...going.map(r => `<i class="in" title="${esc(nameOf(r.personId))} — in"></i>`),
+      ...maybe.map(r => `<i class="mb" title="${esc(nameOf(r.personId))} — maybe"></i>`)
+    ].join('');
+
+    html += `<div class="entry">
+      <div class="entry-head">
+        ${dateMark(t.start)}
+        <div style="flex:1;min-width:0">
+          <h3 class="dest">${esc(t.destination)}${nightsLabel(t)}</h3>
+          <div class="meta">${meta.join('')}</div>
+        </div>
+      </div>
+      ${t.notes ? `<p class="notes">${esc(t.notes)}</p>` : ''}
+      ${blocks ? `<div class="banner">${blocks}</div>` : `<div class="banner empty"></div>`}
+      <div class="roll">${going.length
+        ? roll(going, 'in')
+        : `<span class="nobody">Nobody signed up yet</span>`}${
+        maybe.length ? `<span class="maybe">, ${roll(maybe,'maybe').replace(/<\/?b>/g,'')}</span>` : ''}</div>
+      ${tags}
+      <div class="actions">
+        <button class="${my && my.status === 'in' ? 'on' : ''}" onclick="rsvp('${t.id}','in')">I'm in</button>
+        <button class="${my && my.status === 'maybe' ? 'on maybe' : ''}" onclick="rsvp('${t.id}','maybe')">Maybe</button>
+        <button class="ghost" onclick="copyTrip('${t.id}')">Copy</button>
+        ${t.proposedBy === meId
+          ? `<button class="ghost" onclick="openForm('${t.id}')" aria-label="Edit this trip">Edit</button>
+             <button class="ghost" onclick="dropTrip('${t.id}')" aria-label="Delete this trip">&times;</button>`
+          : ''}
+      </div>
+    </div>`;
+  }
+
+  html += `<button class="newbtn" onclick="openForm()">Propose a trip</button>
+    <button class="quietbtn" onclick="openDigest()">Copy this week for the chat</button>
+    <div class="past-toggle"><button class="linkbtn" onclick="togglePast()">
+      ${showPast ? 'back to upcoming' : 'see past trips'}</button></div>`;
+
+  return html;
+}
+
+/* ---- the tab bar and the view dispatcher ---- */
+
+const TABS = [['board','Trips'], ['settle','Settle'],
+              ['siena','Siena'], ['italian','Italian']];
+
+function tabBar() {
+  return `<nav class="tabs">${TABS.map(([k, label]) =>
+    `<button class="${k === tab ? 'on' : ''}" onclick="setTab('${k}')"
+       aria-current="${k === tab ? 'page' : 'false'}">${label}</button>`).join('')}</nav>`;
+}
+
+function setTab(k) {
+  tab = k;
+  window.scrollTo(0, 0);
+  render();
+}
+
+function render() {
+  const app = document.getElementById('app');
+  let html = tabBar();
+  /* Trips and Settle both write to the database, so they need a name.
+     The two reference tabs are readable without one. */
+  const needsName = (tab === 'board' || tab === 'settle') && !meId;
+
+  if (tab === 'siena')        html += sienaHtml();
+  else if (tab === 'italian') html += italianHtml();
+  else if (needsName)         html += gateHtml();
+  else if (tab === 'settle')  html += `<div id="drawbody"></div>`;
+  else                        html += boardHtml();
+
+  app.innerHTML = html;
+  if (needsName) wireGate();
+  else if (tab === 'settle') renderDraw();
+}
+
+function gateHtml() {
+  const opts = people.slice().sort((a,b) => String(a.name).localeCompare(b.name))
+    .map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  return `<div class="gate">
+    <p>${people.length
+      ? "Pick your name so the board knows who's signing up. It only asks once."
+      : "You're the first one here. Add your name to start the list."}</p>
+    ${people.length ? `<label for="pick">Choose your name</label>
+      <select id="pick"><option value="">—</option>${opts}
+        <option value="__new">I'm not on this list</option></select>` : ''}
+    <div id="newname" style="${people.length ? 'display:none' : ''}">
+      <label for="nm">First name and last initial</label>
+      <input id="nm" placeholder="Jake M" autocomplete="off">
+      <p class="hint">Everyone after you picks from this list, so keep it recognisable.</p>
+    </div>
+    <button class="newbtn" onclick="claim(this)">Continue</button>
+  </div>`;
+}
+
+function wireGate() {
+  const pick = document.getElementById('pick');
+  if (pick) pick.onchange = () => {
+    document.getElementById('newname').style.display = pick.value === '__new' ? 'block' : 'none';
+  };
+}
+
+/* ---- reference sections -------------------------------------------------
+   Static content. Nothing here touches the database or the network.
+
+   REDACTION RULE: this file is served from a public GitHub Pages site, so it
+   carries emergency service numbers and public institutional numbers only.
+   No staff mobiles, no personal email addresses, no residence address, no
+   International SOS membership number. Those live in the PDF shared in the
+   group chat. Do not add them here. */
+
+/* Free Fri-Sun windows across the whole program, ignoring what is on the
+   board — this is a reference table, not a live scan. */
+function allFreeWindows() {
+  const out = [];
+  let run = null;
+  for (let d = PROGRAM_START; d <= PROGRAM_END; d = addDays(d, 1)) {
+    const dow = new Date(d + 'T12:00:00').getDay();
+    if (!(dow === 5 || dow === 6 || dow === 0) || isBlocked(d)) { run = null; continue; }
+    if (run && addDays(run.end, 1) === d) run.end = d;
+    else { run = { start: d, end: d }; out.push(run); }
+  }
+  return out;
+}
+
+const numRow = (n, title, detail, dial, urgent) => `<div class="num">
+  <span class="n${urgent ? ' urgent' : ''}">${dial ? `<a href="tel:${dial}">${n}</a>` : n}</span>
+  <span class="d"><b>${title}</b>${detail || ''}</span></div>`;
+
+function sienaHtml() {
+  const cal = PROGRAM.slice()
+    .sort((a, b) => a.start.localeCompare(b.start))
+    .map(e => {
+      const when = e.end && e.end > e.start
+        ? `${fmt(e.start).replace(/^\w+ /, '')} \u2013 ${fmt(e.end).replace(/^\w+ /, '')}`
+        : fmt(e.start);
+      const who = e.course === 'all' ? 'Everyone' : COURSES[e.course];
+      return `<div class="cal${e.course === 'all' ? ' all' : ''}">
+        <span class="when">${esc(when)}</span>
+        <span><span class="what">${esc(e.title)}</span>${e.tbc ? ' \u2014 not confirmed' : ''}
+        <br><span class="who">${esc(who)}</span></span></div>`;
+    }).join('');
+
+  const windows = allFreeWindows().map(w => {
+    const label = w.end > w.start ? `${fmt(w.start)} \u2013 ${fmt(w.end)}` : fmt(w.start);
+    const n = daysBetween(w.start, w.end).length;
+    const caution = windowCaution(w).replace(/^ \(|\)$/g, '');
+    return `<div class="cal all"><span class="when">${n} day${n > 1 ? 's' : ''}</span>
+      <span><span class="what">${esc(label)}</span>${
+        caution ? `<br><span class="who">${esc(caution)}</span>` : ''}</span></div>`;
+  }).join('');
+
+  return `<div class="doc">
+
+  <h2>Siena: General Info</h2>
+  <p class="lede">Compiled from the U of T Student Guide and the on-site coordinator's
+  arrival email. It is a student's summary, not an official document, and it has no
+  authority &mdash; the Student Guide and your instructor do. Dates and field trips are
+  subject to change. Tap a heading to open it.</p>
+
+  ${topic('If something goes wrong', `
+    <p>Short emergency numbers need no area code and work from any phone, including a
+    locked one with no credit. Tap to dial.</p>
+    ${numRow('112', 'Single European emergency number',
+             'Reaches police, ambulance and fire. Run operationally by the Carabinieri. <b>If in doubt, this is the one.</b>',
+             '112', true)}
+    ${numRow('113', 'Polizia di Stato',
+             'The state police. The Student Guide labels this &ldquo;Local Police&rdquo; \u2014 that is wrong; local policing is the Polizia Municipale.',
+             '113')}
+    ${numRow('115', 'Fire \u2014 Vigili del Fuoco', '', '115')}
+    ${numRow('118', 'Ambulance',
+             '<i>Pronto soccorso</i> is the sign on the hospital door, not &ldquo;emergenza&rdquo;.',
+             '118')}
+
+    <h3>In Siena</h3>
+    <p>Italian landlines keep their leading zero, even when dialled from inside Italy.</p>
+    ${numRow('0577 586111', 'Hospital \u2014 Policlinico Le Scotte',
+             'Viale Bracci 16, outside the city walls.', '+390577586111')}
+    ${numRow('0577 367773', 'Guardia Medica \u2014 emergency doctor',
+             'Clinic in the San Niccol\u00f2 complex, near the classrooms. Roughly \u20ac20\u201350 cash per visit.',
+             '+390577367773')}
+    ${numRow('0577 280028', 'Emergency ambulance service', '', '+390577280028')}
+    ${numRow('0577 201111', 'Police office, Via del Castoro', '', '+390577201111')}
+    ${numRow('0577 586362', 'Volunteer hospital interpreters',
+             'Free, on call, and they help with medical matters when the language runs out.',
+             '+390577586362')}
+    ${numRow('0577 49222', 'Radio Taxi Siena', '', '+39057749222')}
+
+    <h3>Further afield</h3>
+    ${numRow('+1 215 942 8478', 'International SOS',
+             'A <b>US</b> number \u2014 dial the +1. Medical, security and emotional support, referrals, and up to five free counselling sessions per incident per year. <b>It is not travel insurance</b>; anything payable goes through your own insurer.',
+             '+12159428478')}
+    ${numRow('+39 06 854441', 'Canadian Embassy, Rome', 'Via Zara 30.', '+3906854441')}
+    ${numRow('+1 613 996 8885', 'Emergency Operations Centre, Ottawa',
+             'Collect calls accepted.', '+16139968885')}
+    ${numRow('+1 416 978 2222', 'U of T Campus Safety',
+             'Only after trying the On-Site Coordinator.', '+14169782222')}
+    ${numRow('+1 416 978 8713', 'Woodsworth Professional &amp; International Programs',
+             'Mon\u2013Fri, 10:00\u201316:00 EST.', '+14169788713')}
+    <p class="softbox" style="margin-top:14px">On-site staff numbers, email addresses and the
+    residence address are <b>deliberately not on this page</b>, because anyone on the internet
+    can read it. They are in the PDF in the group chat. Save them to your phone now rather than
+    looking for them later.</p>`)}
+
+  ${topic('The program calendar', `
+    <p>Classes run <b>Monday to Thursday, 09:00\u201312:00</b>, except on field trips.
+    <b>No Friday classes.</b> Some Rome trips may move to the evening because of the heat.
+    You may only attend field trips for <b>your own course</b> \u2014 places cannot be traded,
+    sold or given away.</p>
+    ${cal}
+    <p class="src">Anything marked &ldquo;not confirmed&rdquo; is provisional. Criminology's
+    Siena Police visit is one of the 25th or 26th, not both. Confirm everything with your
+    instructor after arrival.</p>`)}
+
+  ${topic('When everyone is free', `
+    <p>Days on which <b>no course</b> has a commitment. Check your own course in the calendar
+    above before assuming a weekday is free \u2014 the three courses travel on different days.</p>
+    ${windows}
+    <p style="margin-top:11px">Beyond those, classes end at noon, so most weekday afternoons and
+    every evening are yours. Whether you may leave a field trip early and travel on from the
+    destination is <b>not addressed by any program document</b> \u2014 ask the On-Site Coordinator,
+    and get the answer in writing before you book.</p>`)}
+
+  ${topic('Ferragosto and the Palio', `
+    <p>The Palio is a religious festival and a serious matter to Sienese people, not a tourist
+    spectacle. Ten of Siena's seventeen <i>contrade</i> race bareback around the Piazza del
+    Campo; the August running is dedicated to Our Lady of the Assumption.</p>
+    <ul>
+      <li><b>13\u201316 Aug</b> \u2014 trial races, usually 09:00 and 19:15. Far less crowded than the
+      race itself and worth going to.</li>
+      <li><b>Sat 15 Aug</b> \u2014 <b>Ferragosto</b>, a national holiday. Much of Italy shuts or
+      leaves town. <i>Prova generale</i> at 19:15, then contrada dress-rehearsal dinners at
+      20:30, which generally welcome outsiders.</li>
+      <li><b>Sun 16 Aug, morning</b> \u2014 contrada museums are free and open to the public. The
+      only day of the year.</li>
+      <li><b>Sun 16 Aug, 15:00</b> \u2014 blessing of horse and jockey, then the historical parade
+      sets off from Piazza del Duomo.</li>
+      <li><b>Sun 16 Aug, by 18:45</b> \u2014 be in the Campo. The race starts around 19:15 and lasts
+      about ninety seconds. Standing in the centre is free; stand seats exist and are very
+      expensive.</li>
+    </ul>
+    <p>No shade, no way out of the centre once it fills, and celebrations running late into the
+    night. Take water and a hat.</p>`)}
+
+  ${topic('Eating', `
+    <p>There is no meal plan. The cheapest option is the student canteen (<i>mensa</i>) \u2014 about
+    <b>\u20ac8\u201310</b> with a card, and the cards are issued free in Siena. The two canteens are at
+    <b>Via Sant'Agata 1</b> and <b>Via Sallustio Bandini 47</b>. Neither serves breakfast.</p>
+    <p class="softbox"><b>The Student Guide gives contradictory mensa hours</b> \u2014 one section
+    says 15:00\u201320:30, another says 19:00\u201321:00, and the assignment it names is from 2024.
+    Confirm on site. Both sections agree the mensas close at 15:30 on 15\u201316 August and may shut
+    entirely for one to two weeks around the Palio. <b>Have a fallback for Palio weekend.</b></p>
+    <p style="margin-top:11px">Groceries: Conad in Piazza Matteotti, or the bigger one at Via
+    Curtatone 16; also Carrefour and PAM. Most shops close on Sundays and many businesses close
+    for the whole of August. Standing at a bar is cheaper than sitting. <i>Coperto</i> on a bill
+    is a normal per-person cover charge, not a scam. Two places give 10% off if you say you are
+    with U of T: Pizzeria Le Principesse and the Euromoda store.</p>`)}
+
+  ${topic('Getting around', `
+    <p class="warnbox"><b>Validate every paper ticket before you travel.</b> Bus tickets go into
+    the machine on board as soon as you get on; train tickets into the machines on the platform
+    before you board. An unvalidated ticket counts as no ticket and the fine is charged on the
+    spot. If the machine is broken, write the time, the stop, the line and your destination on
+    the ticket by hand.</p>
+    <ul style="margin-top:11px">
+      <li><b>Bus tickets are not sold on board.</b> Buy them first at a tobacconist \u2014 look for
+      the white <b>T</b> sign \u2014 or a newsstand.</li>
+      <li>City buses leave from <b>Piazza Antonio Gramsci</b> (0577 204246). Regional buses and
+      buses to Rome leave from <b>Piazza San Domenico</b> (0577 204245).</li>
+      <li>The train station is at Piazza Fratelli Rosselli (0577 280115) \u2014 25 minutes downhill,
+      and uphill coming back.</li>
+      <li>Regional buses often run reduced <i>feriale</i> (weekday-only) timetables. Check before
+      planning a Sunday day trip.</li>
+      <li>Taxis are white or yellow with a meter. Extra for luggage, at night and on holidays,
+      and <b>very few take cards</b>. Avoid unofficial ones near stations and airports.</li>
+      <li><b>Students on Summer Abroad are not permitted to drive</b>, under U of T Safety Abroad
+      policy.</li>
+    </ul>`)}
+
+  ${topic('Money and everyday things', `
+    <ul>
+      <li>Roughly <b>\u20ac1 to CAD $1.59</b> in late July \u2014 rates move.</li>
+      <li><b>Ask for small notes.</b> Many shops refuse anything over \u20ac50.</li>
+      <li>Budget around <b>CAD $1,200 for food</b> across the program.</li>
+      <li>Italian law requires you to keep your receipt (<i>scontrino</i>) within 50 m of the
+      shop. Plain-clothes officers can ask for it and fine you if you cannot produce it.</li>
+      <li>Tap water is safe, and street fountains are drinkable and free. Refill a bottle.</li>
+      <li>Churches: shoulders and knees covered, or you may be refused entry \u2014 including the
+      Duomo.</li>
+      <li>Pharmacies show a green or red cross. They advise and sell over-the-counter medicine
+      but not prescription drugs without an Italian doctor's authorisation. Bring your own
+      basics.</li>
+      <li>Electricity is 220V/50Hz. Dual-voltage devices need an adapter only; anything else
+      needs a converter too.</li>
+      <li>Greet people when you enter a shop and say goodbye when you leave. Do not pick your own
+      fruit at a market \u2014 it is picked for you.</li>
+      <li>August is peak season. Crowds, delays and pickpockets, especially around the Palio.</li>
+    </ul>`)}
+
+  <button class="quietbtn" onclick="window.print()">Print this page</button>
+
+  <p class="src">Sources: U of T Student Guide (retrieved 29 July 2026) and the On-Site
+  Coordinator's arrival email (27 July 2026). Corrections made to the guide: the labels on 112
+  and 113 were swapped, and the International SOS number needs a +1 country code. Where the two
+  sources conflict, both readings are shown rather than one being chosen. Not an official
+  program document.</p>
+  </div>`;
+}
+
+
+/* ---- survival Italian ---- */
+
+const SOUNDS = [
+  ['c before e or i', 'like <i>ch</i> in church \u2014 cinque = CHEEN-kweh'],
+  ['c before a, o, u', 'like <i>k</i> \u2014 casa = KAH-zah'],
+  ['ch', 'always a hard <i>k</i> \u2014 chiami = KYAH-mee'],
+  ['g before e or i', 'like <i>j</i> in jam \u2014 gelato = jeh-LAH-toh'],
+  ['gli', 'like <i>lli</i> in million \u2014 biglietto = bee-LYET-toh'],
+  ['gn', 'like <i>ny</i> in canyon \u2014 bagno = BAH-nyoh'],
+  ['sc before e or i', 'like <i>sh</i> \u2014 pesce = PEH-sheh'],
+  ['z', 'like <i>ts</i> \u2014 grazie = GRAHT-tsyeh'],
+  ['h', 'always silent']
+];
+
+const PHRASES = [
+  { title: 'Emergencies',
+    note: 'Learn these first. 112 reaches police, ambulance and fire.',
+    rows: [
+      ['Help!', 'Aiuto!', 'ah-YOO-toh'],
+      ['Call 112', 'Chiami il 112', 'KYAH-mee eel OO-noh OO-noh DOO-eh'],
+      ['Call an ambulance', "Chiami un'ambulanza", 'KYAH-mee oon am-boo-LAHN-tsah'],
+      ['Call the police', 'Chiami la polizia', 'KYAH-mee lah po-lee-TSEE-ah'],
+      ['I need help', 'Ho bisogno di aiuto', 'oh bee-ZOH-nyoh dee ah-YOO-toh'],
+      ['I need a doctor', 'Ho bisogno di un medico', 'oh bee-ZOH-nyoh dee oon MEH-dee-koh'],
+      ['Where is the emergency room?', "Dov'\u00e8 il pronto soccorso?", 'doh-VEH eel PROHN-toh sok-KOR-soh'],
+      ['Where is the nearest pharmacy?', "Dov'\u00e8 la farmacia pi\u00f9 vicina?", 'doh-VEH lah far-mah-CHEE-ah pyoo vee-CHEE-nah'],
+      ['I feel ill', 'Mi sento male', 'mee SEN-toh MAH-leh'],
+      ['It hurts here', 'Mi fa male qui', 'mee fah MAH-leh kwee'],
+      ['He / she has fainted', '\u00c8 svenuto / svenuta', 'eh sveh-NOO-toh / sveh-NOO-tah'],
+      ['I have been robbed', 'Mi hanno derubato', 'mee AHN-noh deh-roo-BAH-toh'],
+      ['I have lost my passport', 'Ho perso il passaporto', 'oh PEHR-soh eel pas-sah-POR-toh'],
+      ['Leave me alone', 'Mi lasci in pace', 'mee LAH-shee een PAH-cheh']
+    ]},
+  { title: 'Allergies and medical',
+    note: 'Say <i>allergico</i> if you are male, <i>allergica</i> if female. Check anything safety-critical with a fluent speaker before you rely on it.',
+    rows: [
+      ['I am allergic to\u2026', 'Sono allergico / allergica a\u2026', 'SOH-noh al-LEHR-jee-koh / -kah ah'],
+      ['It is serious', '\u00c8 grave', 'eh GRAH-veh'],
+      ['Does it contain\u2026?', 'Contiene\u2026?', 'kon-TYEH-neh'],
+      ['Without\u2026', 'Senza\u2026', 'SEN-tsah'],
+      ['peanuts / tree nuts', 'arachidi / frutta a guscio', 'ah-RAH-kee-dee / FROOT-tah ah GOO-shoh'],
+      ['gluten / milk', 'glutine / latte', 'GLOO-tee-neh / LAHT-teh'],
+      ['eggs / fish / shellfish', 'uova / pesce / crostacei', 'WOH-vah / PEH-sheh / kro-STAH-cheh-ee'],
+      ['soy / sesame', 'soia / sesamo', 'SOH-yah / SEH-zah-moh'],
+      ['I am diabetic', 'Sono diabetico / diabetica', 'SOH-noh dee-ah-BEH-tee-koh'],
+      ['I have asthma', "Ho l'asma", 'oh LAHZ-mah'],
+      ['I take this medication', 'Prendo questo farmaco', 'PREN-doh KWEH-stoh FAR-mah-koh']
+    ]},
+  { title: 'The bare minimum',
+    note: '<i>Permesso</i> is the one everybody forgets and needs daily \u2014 on a packed bus, entering a shop, edging through a crowd. Say it before you push.',
+    rows: [
+      ['Good morning / good day', 'Buongiorno', 'bwon-JOR-noh'],
+      ['Good evening', 'Buonasera', 'bwoh-nah-SEH-rah'],
+      ['Good night (leaving, or bed)', 'Buonanotte', 'bwoh-nah-NOT-teh'],
+      ['Hi / bye (informal)', 'Ciao', 'chow'],
+      ['Hello (neutral, any time)', 'Salve', 'SAHL-veh'],
+      ['Goodbye', 'Arrivederci', 'ar-ree-veh-DEHR-chee'],
+      ['Please', 'Per favore', 'pehr fah-VOH-reh'],
+      ['Thank you / thanks a lot', 'Grazie / grazie mille', 'GRAHT-tsyeh / GRAHT-tsyeh MEEL-leh'],
+      ["You're welcome / go ahead", 'Prego', 'PREH-goh'],
+      ['Excuse me (getting attention)', 'Mi scusi', 'mee SKOO-zee'],
+      ['Excuse me (squeezing past)', 'Permesso', 'pehr-MES-soh'],
+      ['I am sorry', 'Mi dispiace', 'mee dees-PYAH-cheh'],
+      ['It does not matter', 'Non fa niente', 'nohn fah NYEN-teh'],
+      ['yes / no', 's\u00ec / no', 'see / noh']
+    ]},
+  { title: 'When you do not understand',
+    rows: [
+      ['I do not speak Italian', 'Non parlo italiano', 'nohn PAR-loh ee-tah-LYAH-noh'],
+      ['Do you speak English? (formal)', 'Parla inglese?', 'PAR-lah een-GLEH-zeh'],
+      ['Do you speak English? (informal)', 'Parli inglese?', 'PAR-lee een-GLEH-zeh'],
+      ['Does anyone here speak English?', "C'\u00e8 qualcuno che parla inglese?", 'cheh kwal-KOO-noh keh PAR-lah een-GLEH-zeh'],
+      ['I do not understand', 'Non capisco', 'nohn kah-PEE-skoh'],
+      ['More slowly, please', 'Pi\u00f9 lentamente, per favore', 'pyoo len-tah-MEN-teh'],
+      ['Could you repeat that?', 'Pu\u00f2 ripetere?', 'pwoh ree-PEH-teh-reh'],
+      ['Could you write it down?', 'Pu\u00f2 scriverlo?', 'pwoh SKREE-vehr-loh'],
+      ['How do you say this in Italian?', 'Come si dice questo in italiano?', 'KOH-meh see DEE-cheh'],
+      ['What does that mean?', 'Cosa vuol dire?', 'KOH-zah vwol DEE-reh'],
+      ['I do not know', 'Non lo so', 'nohn loh soh']
+    ]},
+  { title: 'Numbers',
+    note: 'The U of T list prints 9 as &ldquo;ove&rdquo;. The word is <i>nove</i> \u2014 the n was lost in typesetting. Everything else in their list is right.',
+    rows: [
+      ['0 / 1 / 2 / 3', 'zero / uno / due / tre', 'DZEH-roh / OO-noh / DOO-eh / treh'],
+      ['4 / 5 / 6', 'quattro / cinque / sei', 'KWAHT-troh / CHEEN-kweh / say'],
+      ['7 / 8 / 9', 'sette / otto / nove', 'SET-teh / OT-toh / NOH-veh'],
+      ['10 / 11 / 12', 'dieci / undici / dodici', 'DYEH-chee / OON-dee-chee / DOH-dee-chee'],
+      ['13 / 14 / 15', 'tredici / quattordici / quindici', 'TREH-dee-chee / kwat-TOR-dee-chee / KWEEN-dee-chee'],
+      ['16 / 17 / 18', 'sedici / diciassette / diciotto', 'SEH-dee-chee / dee-chas-SET-teh / dee-CHOT-toh'],
+      ['19 / 20 / 30', 'diciannove / venti / trenta', 'dee-chan-NOH-veh / VEN-tee / TREN-tah'],
+      ['50 / 100', 'cinquanta / cento', 'cheen-KWAN-tah / CHEN-toh']
+    ]},
+  { title: 'Directions',
+    rows: [
+      ['Where is\u2026?', "Dov'\u00e8\u2026?", 'doh-VEH'],
+      ['Where is the toilet?', "Dov'\u00e8 il bagno?", 'doh-VEH eel BAH-nyoh'],
+      ['How do I get to\u2026?', 'Come si arriva a\u2026?', 'KOH-meh see ar-REE-vah ah'],
+      ['left / right / straight on', 'a sinistra / a destra / dritto', 'ah see-NEE-strah / ah DEH-strah / DREET-toh'],
+      ['near / far', 'vicino / lontano', 'vee-CHEE-noh / lon-TAH-noh'],
+      ['I am lost', 'Mi sono perso / persa', 'mee SOH-noh PEHR-soh / PEHR-sah'],
+      ['Is it far on foot?', '\u00c8 lontano a piedi?', 'eh lon-TAH-noh ah PYEH-dee']
+    ]},
+  { title: 'Trains and buses',
+    note: 'Paper regional tickets must be stamped in the machines on the platform before you board. An unvalidated ticket counts as no ticket and the fine is charged on the spot.',
+    rows: [
+      ['A ticket to Florence, please', 'Un biglietto per Firenze, per favore', 'oon bee-LYET-toh pehr fee-REN-tseh'],
+      ['one way / return', 'solo andata / andata e ritorno', 'SOH-loh an-DAH-tah / an-DAH-tah eh ree-TOR-noh'],
+      ['Which platform?', 'Quale binario?', 'KWAH-leh bee-NAH-ryoh'],
+      ['What time does it leave?', 'A che ora parte?', 'ah keh OH-rah PAR-teh'],
+      ['Does this train go to\u2026?', 'Questo treno va a\u2026?', 'KWEH-stoh TREH-noh vah ah'],
+      ['The train is late / cancelled', '\u00c8 in ritardo / soppresso', 'een ree-TAR-doh / sop-PRES-soh'],
+      ['Do I need to validate it?', 'Devo convalidare il biglietto?', 'DEH-voh kon-vah-lee-DAH-reh'],
+      ['the next stop', 'la prossima fermata', 'lah PROS-see-mah fehr-MAH-tah'],
+      ['Do I get off here?', 'Devo scendere qui?', 'DEH-voh SHEN-deh-reh kwee'],
+      ['strike', 'sciopero', 'SHOH-peh-roh']
+    ]},
+  { title: 'Eating and drinking',
+    note: '<i>Un caff\u00e8</i> means an espresso. Standing at the bar is cheaper than sitting, and <i>coperto</i> on the bill is a normal cover charge, not a scam.',
+    rows: [
+      ['A table for four, please', 'Un tavolo per quattro, per favore', 'oon TAH-voh-loh pehr KWAHT-troh'],
+      ['The bill, please', 'Il conto, per favore', 'eel KOHN-toh'],
+      ['still / sparkling water', 'acqua naturale / frizzante', 'AH-kwah nah-too-RAH-leh / freed-DZAN-teh'],
+      ['tap water', 'acqua del rubinetto', 'AH-kwah del roo-bee-NET-toh'],
+      ['I am vegetarian', 'Sono vegetariano / vegetariana', 'SOH-noh veh-jeh-tah-RYAH-noh'],
+      ['takeaway', 'da portare via', 'dah por-TAH-reh VEE-ah'],
+      ['Can I pay by card?', 'Posso pagare con la carta?', 'POS-soh pah-GAH-reh kon lah KAR-tah'],
+      ['I am hungry / thirsty', 'Ho fame / ho sete', 'oh FAH-meh / oh SEH-teh'],
+      ['It was delicious', 'Era buonissimo', 'EH-rah bwoh-NEES-see-moh']
+    ]},
+  { title: 'Shops and money',
+    rows: [
+      ['How much is it?', 'Quanto costa?', 'KWAN-toh KOH-stah'],
+      ['It is cheap / expensive', 'Costa poco / \u00c8 caro', 'KOH-stah POH-koh / eh KAH-roh'],
+      ['That is too expensive', '\u00c8 troppo caro', 'eh TROP-poh KAH-roh'],
+      ['I am just looking, thanks', 'Sto solo guardando, grazie', 'stoh SOH-loh gwar-DAN-doh'],
+      ['the receipt', 'lo scontrino', 'loh skon-TREE-noh'],
+      ['Do you have\u2026?', 'Avete\u2026?', 'ah-VEH-teh']
+    ]},
+  { title: 'Siena words',
+    rows: [
+      ['district / neighbourhood', 'contrada (plural: contrade)', 'kon-TRAH-dah'],
+      ['the main square', 'Piazza del Campo', 'PYAHT-tsah del KAM-poh'],
+      ['the cathedral', 'il Duomo', 'eel DWOH-moh'],
+      ['my room number is\u2026', 'il numero della mia camera \u00e8\u2026', 'eel NOO-meh-roh DEL-lah MEE-ah KAH-meh-rah eh'],
+      ['I am a student', 'Sono uno studente / una studentessa', 'SOH-noh OO-noh stoo-DEN-teh'],
+      ['I am Canadian', 'Sono canadese', 'SOH-noh kah-nah-DEH-zeh']
+    ]}
+];
+
+function topic(title, inner, note, open) {
+  return `<details class="topic"${open ? ' open' : ''}>
+    <summary>${title}</summary>
+    ${note ? `<p class="topicnote">${note}</p>` : ''}
+    ${inner}
+  </details>`;
+}
+
+function italianHtml() {
+  const sounds = topic('Nine rules that fix most of your pronunciation',
+    `<div class="rulelist">${SOUNDS.map(([a, b]) =>
+      `<div><b>${a}</b> \u2014 ${b}</div>`).join('')}</div>
+     <p class="topicnote" style="padding-top:10px">Stress falls on the second-to-last syllable
+     unless an accent says otherwise (citt\u00e0, perch\u00e9). Every vowel is pronounced \u2014 there are
+     no silent letters. CAPITALS below mark the stressed syllable.</p>`);
+
+  const body = PHRASES.map(sec => topic(sec.title,
+    sec.rows.map(([en, it, say]) => `<div class="ph">
+      <div class="en">${en}</div>
+      <div class="it">${it}</div>
+      <div class="say">${say}</div></div>`).join(''),
+    sec.note, sec.open)).join('');
+
+  const notes = topic('Two things the official list does not tell you',
+    `<div class="ph"><div class="en">Words change with your gender</div>
+       <div class="it">Sono stanco / Sono stanca</div>
+       <div class="say">A man is tired / a woman is tired</div></div>
+     <p class="topicnote">Anything ending in <b>-o</b> becomes <b>-a</b> if you are female. The
+     U of T list gives only the masculine forms without saying so. Words ending in <b>-e</b>,
+     like <i>canadese</i> and <i>studente</i>, do not change.</p>
+     <div class="ph"><div class="en">There are two ways to say &ldquo;you&rdquo;</div>
+       <div class="it">Mi scusi \u2192 Scusa &nbsp;\u00b7&nbsp; Parla inglese? \u2192 Parli inglese?</div>
+       <div class="say">formal \u2192 informal</div></div>
+     <p class="topicnote">The official list is entirely formal, which is right for shopkeepers,
+     officials and anyone older, but sounds stiff with people your own age. When in doubt use the
+     formal one \u2014 being slightly too polite costs nothing.</p>`);
+
+  return `<div class="doc">
+    <h2>Survival Italian</h2>
+    <p class="lede">Built from the U of T student guide vocabulary list, corrected and extended.
+    The guide warns that not speaking Italian in an emergency is &ldquo;an insurmountable
+    challenge&rdquo; and then supplies no emergency vocabulary at all, and none for allergies
+    despite telling you to write yours down. Those sections are new here, along with transport,
+    food, money and pronunciation.</p>
+    ${sounds}${body}${notes}
+    <button class="quietbtn" onclick="window.print()">Print this page</button>
+    <p class="src">Corrections to the U of T list: <i>nove</i>, not &ldquo;ove&rdquo;, for 9.
+    The emergency, allergy, transport and money sections are additions.
+    <b>The allergy section is safety-critical \u2014 check it against a second source or a fluent
+    speaker before relying on it.</b></p>
+  </div>`;
+}
+
+/* Printing a collapsed section prints nothing, so open everything first. */
+window.addEventListener('beforeprint', () => {
+  document.querySelectorAll('details.topic').forEach(d => {
+    if (!d.open) { d.dataset.wasShut = '1'; d.open = true; }
+  });
+});
+window.addEventListener('afterprint', () => {
+  document.querySelectorAll('details.topic[data-was-shut]').forEach(d => {
+    d.open = false; delete d.dataset.wasShut;
+  });
+});
+
+/* ---- identity ---- */
+
+async function claim(btn) {
+  const pick = document.getElementById('pick');
+  const chosen = pick ? pick.value : '__new';
+  if (!chosen) return toast('Pick a name first');
+  if (chosen !== '__new') { meId = chosen; remember(meId); return render(); }
+
+  const nm = document.getElementById('nm').value.trim();
+  if (!nm) return toast('Type your name first');
+  const dupe = people.find(p => String(p.name).toLowerCase() === nm.toLowerCase());
+  if (dupe) { meId = dupe.id; remember(meId); return render(); }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const [row] = await insert('people', { name: nm.slice(0, 60) });
+    people.push({ id: row.id, name: row.name });
+    meId = row.id; remember(meId); stash(); render();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Continue';
+    toast("Couldn't save that — try again");
+  }
+}
+function remember(id) { try { localStorage.setItem('siena:me', id); } catch (e) {} }
+function forget() {
+  try { localStorage.removeItem('siena:me'); } catch (e) {}
+  meId = null; render();
+}
+
+/* ---- rsvp ---- */
+
+function rsvp(tripId, status) {
+  const i = rsvps.findIndex(r => r.tripId === tripId && r.personId === meId);
+  const clearing = i > -1 && rsvps[i].status === status;
+  if (clearing) rsvps.splice(i, 1);
+  else if (i > -1) rsvps[i] = { ...rsvps[i], status };
+  else rsvps.push({ tripId, personId: meId, status });
+  render(); stash();
+  enqueue(() => clearing
+    ? removeRsvp(tripId, meId)
+    : upsertRsvp({ trip_id: tripId, person_id: meId, status,
+                   updated_at: new Date().toISOString() }));
+}
+
+function dropTrip(tripId) {
+  if (!confirm('Delete this trip for everyone?')) return;
+  trips = trips.filter(t => t.id !== tripId);
+  rsvps = rsvps.filter(r => r.tripId !== tripId);
+  render(); stash();
+  enqueue(() => api(`trips?id=eq.${tripId}`, { method:'DELETE' }));
+}
+
+async function refresh(btn) {
+  btn.textContent = 'refreshing…';
+  try { await load(); } catch (e) { offline = true; }
+  render();
+}
+
+/* ---- propose / edit ---- */
+
+const FIELDS = [
+  ['destination', 'Destination'], ['start', 'Departure'], ['end', 'Return'],
+  ['meetPoint', 'Meeting point'], ['meetTime', 'Meeting time'],
+  ['cost', 'Cost'], ['minPeople', 'Minimum people']
+];
+
+function describeChanges(before, after) {
+  const out = [];
+  for (const [k, label] of FIELDS) {
+    const a = before[k] == null || before[k] === '' ? '' : String(before[k]);
+    const b = after[k]  == null || after[k]  === '' ? '' : String(after[k]);
+    if (a === b) continue;
+    if (!a) out.push(`${label} set to ${b}`);
+    else if (!b) out.push(`${label} removed`);
+    else out.push(`${label} ${a} → ${b}`);
+  }
+  if (String(before.notes || '') !== String(after.notes || '')) out.push('notes updated');
+  return out.join('; ');
+}
+
+function openForm(tripId) {
+  const t = tripId ? trips.find(x => x.id === tripId) : null;
+  const val = v => v == null ? '' : esc(v);
+  const el = document.createElement('div');
+  el.className = 'sheet';
+  el.onclick = e => { if (e.target === el) el.remove(); };
+  el.innerHTML = `<div class="sheet-inner">
+    <h2>${t ? 'Edit trip' : 'Propose a trip'}</h2>
+    ${t ? `<p class="lede">Anyone already signed up will see what you changed.</p>` : ''}
+    <label for="f-dest">Where</label>
+    <input id="f-dest" placeholder="Florence" autocomplete="off" value="${val(t && t.destination)}">
+    <div class="row">
+      <div><label for="f-start">Leaving</label>
+        <input id="f-start" type="date" value="${val(t ? t.start : today())}"></div>
+      <div><label for="f-end">Back</label>
+        <input id="f-end" type="date" value="${val(t && t.end)}"></div>
+    </div>
+    <p class="hint">Leave "back" empty for a day trip.</p>
+    <div id="f-clash"></div>
+    <div class="row">
+      <div><label for="f-point">Meet at</label>
+        <input id="f-point" placeholder="Piazza Gramsci" value="${val(t && t.meetPoint)}"></div>
+      <div><label for="f-time">Time</label>
+        <input id="f-time" placeholder="07:40" value="${val(t && t.meetTime)}"></div>
+    </div>
+    <div class="row">
+      <div><label for="f-cost">Rough cost &euro;</label>
+        <input id="f-cost" type="number" min="0" placeholder="18" value="${val(t && t.cost)}"></div>
+      <div><label for="f-min">Min. people</label>
+        <input id="f-min" type="number" min="0" placeholder="6" value="${val(t && t.minPeople)}"></div>
+    </div>
+    <label for="f-notes">Anything else</label>
+    <textarea id="f-notes" placeholder="Hostel deposit due Monday">${val(t && t.notes)}</textarea>
+    <button class="newbtn" onclick="saveTrip(this, ${t ? `'${t.id}'` : 'null'})">
+      ${t ? 'Save changes' : 'Add to the board'}</button>
+  </div>`;
+  document.body.appendChild(el);
+  document.getElementById('f-start').onchange = paintClash;
+  document.getElementById('f-end').onchange = paintClash;
+  paintClash();
+  document.getElementById('f-dest').focus();
+}
+
+function clashSentence(list) {
+  return list.map(e => {
+    const when = e.end && e.end > e.start
+      ? `${fmt(e.start)} – ${fmt(e.end)}` : fmt(e.start);
+    const who = e.course === 'all' ? '' : COURSES[e.course] + ' in ';
+    return `${who}${e.title}, ${when}${e.tbc ? ' (not confirmed)' : ''}`;
+  }).join('; ');
+}
+
+function paintClash() {
+  const box = document.getElementById('f-clash');
+  if (!box) return;
+  const s = document.getElementById('f-start').value;
+  const hits = programClashes(s, document.getElementById('f-end').value);
+  const hard = hits.filter(e => e.blocks), soft = hits.filter(e => !e.blocks);
+  let html = '';
+  if (hard.length)
+    html += `<p class="clashnote">Clashes with the program: ${
+      esc(clashSentence(hard))}. You can still propose it.</p>`;
+  if (soft.length)
+    html += `<p class="clashnote soft">Worth knowing: ${esc(clashSentence(soft))}.</p>`;
+  box.innerHTML = html;
+}
+
+async function saveTrip(btn, tripId) {
+  const v = id => document.getElementById(id).value.trim();
+  if (!v('f-dest'))  return toast('Where are you going?');
+  if (!v('f-start')) return toast('Pick a date');
+
+  const hard = programClashes(v('f-start'), v('f-end')).filter(e => e.blocks);
+  if (hard.length && !confirm(
+        `That runs into the program: ${clashSentence(hard)}.\n\nPost it anyway?`))
+    return;
+
+  const body = {
+    destination: v('f-dest').slice(0, 80),
+    start_date:  v('f-start'),
+    end_date:    v('f-end') || null,
+    meet_point:  v('f-point') || null,
+    meet_time:   v('f-time') || null,
+    cost:        v('f-cost') ? Number(v('f-cost')) : null,
+    min_people:  v('f-min') ? Number(v('f-min')) : null,
+    notes:       v('f-notes') ? v('f-notes').slice(0, 400) : null
+  };
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    if (tripId) {
+      const before = trips.find(t => t.id === tripId);
+      const after  = shapeTrip({ ...body, id: tripId, proposed_by: before.proposedBy });
+      const summary = describeChanges(before, after);
+      if (!summary) { document.querySelector('.sheet').remove(); return; }
+      body.last_change = summary.slice(0, 300);
+      body.updated_at  = new Date().toISOString();
+      const [row] = await patch('trips', `id=eq.${tripId}`, body);
+      trips = trips.map(t => t.id === tripId ? shapeTrip(row) : t);
+    } else {
+      const [row] = await insert('trips', { ...body, proposed_by: meId });
+      trips.push(shapeTrip(row));
+      rsvps.push({ tripId: row.id, personId: meId, status: 'in' });
+      enqueue(() => upsertRsvp({ trip_id: row.id, person_id: meId, status: 'in',
+                                 updated_at: new Date().toISOString() }));
+      showPast = false;
+    }
+    document.querySelector('.sheet').remove();
+    stash(); render();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = tripId ? 'Save changes' : 'Add to the board';
+    toast("Couldn't save — try again");
+  }
+}
+
+/* ---- the randomiser ---- */
+
+let drawMode = 'coin', lastQuestion = '';
+
+const MODE_COPY = {
+  coin:     { title:'Flip a coin', lede:'Two options, one answer, no arguing.', cta:'Flip' },
+  list:     { title:'Pick one',    lede:'One per line. Something gets chosen.', cta:'Draw' },
+  dictator: { title:'Appoint someone',
+              lede:'One name per line. Whoever is drawn decides, and nobody else gets a say.',
+              cta:'Appoint' }
+};
+
+function setMode(m) { drawMode = m; renderDraw(); }
+
+function renderDraw(result) {
+  const body = document.getElementById('drawbody');
+  if (!body) return;
+  const c = MODE_COPY[drawMode];
+  const inputs = drawMode === 'coin'
+    ? `<label for="d-a">Option one</label>
+       <input id="d-a" placeholder="Florence" autocomplete="off">
+       <label for="d-b">Option two</label>
+       <input id="d-b" placeholder="Stay in Siena" autocomplete="off">`
+    : `<label for="d-items">${drawMode === 'dictator' ? 'Names' : 'Options'}, one per line</label>
+       <textarea id="d-items" rows="5" placeholder="${drawMode === 'dictator'
+          ? 'Jake M\nPriya S\nMarco T' : 'Pizzeria\nOsteria\nThat place by the Campo'}"></textarea>`;
+
+  body.innerHTML = `
+    <h2>${c.title}</h2>
+    <p class="lede">${c.lede}</p>
+    <div class="modes">
+      ${['coin','list','dictator'].map(m =>
+        `<button class="${m === drawMode ? 'on' : ''}" onclick="setMode('${m}')">${
+          m === 'coin' ? 'Coin' : m === 'list' ? 'Pick one' : 'Appoint'}</button>`).join('')}
+    </div>
+    <label for="d-q">What's this deciding? (optional)</label>
+    <input id="d-q" placeholder="Where to eat tonight" autocomplete="off" value="${esc(lastQuestion)}">
+    ${inputs}
+    ${result ? verdictHtml(result) : ''}
+    <button class="newbtn" onclick="doDraw(this)">${c.cta}</button>
+    ${ledgerHtml()}`;
+}
+
+function verdictHtml(r) {
+  const said = r.kind === 'coin'     ? 'The coin has spoken.'
+             : r.kind === 'dictator' ? 'Appointed. The matter rests with them.'
+             : `Drawn from ${r.items.length} options.`;
+  return `<div class="verdict">
+    ${r.question ? `<span class="q">${esc(r.question)}</span>` : ''}
+    <span class="r">${esc(r.result)}</span>
+    <span class="said">${said}</span></div>`;
+}
+
+function ledgerHtml() {
+  const recent = draws.slice(0, 12), counts = {};
+  return `<div class="ledger"><span class="cap">The ledger</span>
+    ${recent.length ? `<ol>${recent.map(d => {
+      const key = (d.question || '').trim().toLowerCase();
+      let again = '';
+      if (key) {
+        const total = draws.filter(x => (x.question || '').trim().toLowerCase() === key).length;
+        counts[key] = (counts[key] || 0) + 1;
+        const nth = total - counts[key] + 1;
+        if (nth > 1) again = ` <span class="again">attempt ${nth}</span>`;
+      }
+      return `<li>${d.question ? esc(d.question) + ' — ' : ''}<b>${esc(d.result)}</b>${again}
+        <br>${esc(nameOf(d.drawn_by))} · ${ago(d.created_at)}</li>`;
+    }).join('')}</ol>` : `<p class="none">Nothing settled yet.</p>`}</div>`;
+}
+
+async function doDraw(btn) {
+  const q = document.getElementById('d-q').value.trim().slice(0, 80);
+  let items;
+  if (drawMode === 'coin') {
+    const a = document.getElementById('d-a').value.trim();
+    const b = document.getElementById('d-b').value.trim();
+    if (!a || !b) return toast('Fill in both options');
+    items = [a, b];
+  } else {
+    items = document.getElementById('d-items').value
+      .split('\n').map(s => s.trim()).filter(Boolean);
+    if (items.length < 2) return toast('Give it at least two to choose from');
+  }
+  items = items.slice(0, 30).map(s => s.slice(0, 60));
+
+  lastQuestion = q;
+  btn.disabled = true;
+  btn.textContent = drawMode === 'dictator' ? 'Appointing…' : 'Drawing…';
+
+  const result = pick(items);
+  const row = { kind: drawMode, question: q || null, items, result, drawn_by: meId };
+  await new Promise(r => setTimeout(r, 750));
+
+  draws.unshift({ ...row, created_at: new Date().toISOString() });
+  stash();
+  renderDraw({ ...row, items });
+  enqueue(() => insert('draws', row));
+}
+
+/* ---- copying ---- */
+
+function copyText(text, btn) {
+  const done = () => {
+    if (btn) { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1800); }
+    else toast('Copied — paste it in the chat');
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else fallbackCopy(text, done);
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:absolute;left:-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch (e) { toast('Select and copy the text above'); }
+  ta.remove();
+}
+
+function copyTrip(id) {
+  const t = trips.find(x => x.id === id);
+  const g = countIn(id), m = countMaybe(id);
+  const when = fmt(t.start) + (t.end && t.end > t.start ? ` – ${fmt(t.end)}` : '');
+  const bits = [`${t.destination}, ${when}`];
+  if (t.meetPoint || t.meetTime) bits.push(`meet ${[t.meetPoint,t.meetTime].filter(Boolean).join(' ')}`);
+  if (t.cost) bits.push(`~€${Math.round(t.cost)}`);
+  bits.push(`${g} in${m ? `, ${m} maybe` : ''}`);
+  copyText(bits.join(' — '));
+}
+
+function togglePast() { showPast = !showPast; render(); }
+
+let toastTimer;
+function toast(msg) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.setAttribute('role', 'status');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.remove(), 2600);
+}
+
+(async function init() {
+  const app = document.getElementById('app');
+  try { meId = localStorage.getItem('siena:me'); } catch (e) {}
+  const hadCache = unstash();
+  if (hadCache) render();
+  try {
+    await load();
+    if (meId && !people.some(p => p.id === meId)) meId = null;
+    render();
+  } catch (e) {
+    offline = true;
+    if (hadCache) render();
+    else app.innerHTML = `<div class="state err">Couldn't reach the database, and there's
+      nothing saved on this device yet. Check your signal and reload.<br><br>
+      <code>${esc(e.message)}</code></div>`;
+  }
+})();
+</script>
+</body>
+</html>
